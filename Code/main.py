@@ -41,17 +41,10 @@ def record_audio(filename, duration=5, sample_rate=16000, channels=1):
     
     return filename
 
-def is_ffmpeg_installed():
-    """Check if ffmpeg is installed and accessible."""
-    return which("ffmpeg") is not None
 
 def convert_to_wav(input_path, output_path="converted_audio.wav"):
-    """Convert audio file to WAV format."""
     if not os.path.exists(input_path):
         print(f"Error: File '{input_path}' does not exist.")
-        return None
-    if not is_ffmpeg_installed():
-        print("Error: ffmpeg is not installed or not in PATH. Please install ffmpeg to proceed.")
         return None
     try:
         print(f"Converting '{input_path}' to WAV format...")
@@ -64,7 +57,6 @@ def convert_to_wav(input_path, output_path="converted_audio.wav"):
         return None
 
 def transcribe_with_whisper(audio_path, model_size="tiny"):
-    """Transcribe audio using a lightweight Whisper model."""
     try:
         try:
             model = WhisperModel(model_size)
@@ -79,7 +71,6 @@ def transcribe_with_whisper(audio_path, model_size="tiny"):
         return f"Error transcribing with Whisper: {e}"
 
 def transcribe_directory_to_csv(directory, output_csv, model_size="tiny"):
-    """Transcribe all audio files in a directory and save results to a CSV file."""
     if not os.path.exists(directory):
         print(f"Error: Directory '{directory}' does not exist.")
         return

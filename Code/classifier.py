@@ -13,7 +13,7 @@ import joblib
 import os
 
 # Create Models directory if it doesn't exist
-models_dir = "AI_Hackathon_IITM/Models"
+models_dir = "../Models"
 os.makedirs(models_dir, exist_ok=True)
 
 def load_data(csv_path, text_column='transcript', label_column='label', test_size=0.2, random_state=42):
@@ -257,7 +257,7 @@ def analyze_feature_importance(model, labels, top_n=20):
     else:
         print("\nFeature importance analysis not supported for this model type.")
 
-def save_model(model, model_name='voice_text_classifier.joblib'):
+def save_model(model, model_name='../Models/voice_text_classifier.joblib'):
     """
     Save the trained model to disk in the Models directory
     
@@ -268,7 +268,7 @@ def save_model(model, model_name='voice_text_classifier.joblib'):
     model_name : str
         Name of the model file
     """
-    model_path = os.path.join("AI_Hackathon_IITM/Models", model_name)
+    model_path = os.path.join("../Models", model_name)
     joblib.dump(model, model_path)
     print(f"\nModel saved to {model_path}")
 

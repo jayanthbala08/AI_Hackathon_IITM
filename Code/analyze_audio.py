@@ -3,7 +3,7 @@ import sys
 import joblib
 from main import transcribe_with_whisper, convert_to_wav  # Import functions from main.py
 
-def classify_text(text, model_path='voice_text_classifier.joblib'):
+def classify_text(text, model_path='../Models/voice_text_classifier.joblib'):
     """Classify the transcribed text using the saved model."""
     try:
         # Load the trained model
@@ -27,7 +27,7 @@ def classify_text(text, model_path='voice_text_classifier.joblib'):
         print(f"Error in classification: {e}")
         return None
 
-def process_audio_file(audio_path, model_path='voice_text_classifier.joblib', whisper_model_size='tiny'):
+def process_audio_file(audio_path, model_path='../Models/voice_text_classifier.joblib', whisper_model_size='tiny'):
     """Process audio file: transcribe and classify."""
     print(f"Processing audio file: {audio_path}")
     
@@ -56,7 +56,7 @@ def main():
             audio_path = os.path.join(os.getcwd(), audio_path)
     else:
         # Default audio file if none provided
-        audio_path = "D:/Jayanth/AI_Hackathon/audio_sample_2.wav"
+        audio_path = "../sample_data/audio_sample_2.wav"
         print("No audio file specified. Using default:", audio_path)
     
     # Process the audio file
