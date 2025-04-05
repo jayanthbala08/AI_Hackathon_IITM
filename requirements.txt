@@ -3,3 +3,7 @@ pyaudio
 faster-whisper
 openai-whisper
 pydub
+gtts
+flask
+flask-corss
+pyaudio
