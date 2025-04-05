@@ -10,6 +10,11 @@ from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+import os
+
+# Create Models directory if it doesn't exist
+models_dir = "AI_Hackathon_IITM/Models"
+os.makedirs(models_dir, exist_ok=True)
 
 def load_data(csv_path, text_column='transcript', label_column='label', test_size=0.2, random_state=42):
     """
@@ -252,21 +257,18 @@ def analyze_feature_importance(model, labels, top_n=20):
     else:
         print("\nFeature importance analysis not supported for this model type.")
 
-def save_model(model, model_path='voice_text_classifier.joblib'):
+def save_model(model, model_name='voice_text_classifier.joblib'):
     """
-    Save the trained model to disk
+    Save the trained model to disk in the Models directory
     
     Parameters:
     -----------
     model : sklearn Pipeline
         Trained classification model
-    model_path : str
-        Path to save the model
-        
-    Returns:
-    --------
-    None
+    model_name : str
+        Name of the model file
     """
+    model_path = os.path.join("AI_Hackathon_IITM/Models", model_name)
     joblib.dump(model, model_path)
     print(f"\nModel saved to {model_path}")
 
@@ -323,7 +325,7 @@ def main():
     parser.add_argument('--text_column', type=str, default='text', help='Name of the column containing the transcribed text')
     parser.add_argument('--label_column', type=str, default='label', help='Name of the column containing the labels')
     parser.add_argument('--model_type', type=str, default='logistic', choices=['logistic', 'rf', 'svm'], help='Type of model to train')
-    parser.add_argument('--model_path', type=str, default='voice_text_classifier.joblib', help='Path to save the trained model')
+    parser.add_argument('--model_name', type=str, default='voice_text_classifier.joblib', help='Name of the model file')
     parser.add_argument('--test_size', type=float, default=0.2, help='Proportion of the dataset to include in the test split')
     
     args = parser.parse_args()
@@ -346,7 +348,7 @@ def main():
     analyze_feature_importance(model, labels)
     
     # Save the model
-    save_model(model, args.model_path)
+    save_model(model, args.model_name)
     
     # Example of how to use the model for prediction
     print("\nExample prediction:")
