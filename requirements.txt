@@ -5,5 +5,6 @@ openai-whisper
 pydub
 gtts
 flask
-flask-corss
-pyaudio
+flask-cors
+numpy
+joblib

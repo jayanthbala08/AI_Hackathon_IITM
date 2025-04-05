@@ -1,130 +1,110 @@
-# Voice Analyzer
+# AI Call Assistant
 
-A web-based application that records audio, transcribes speech, and classifies the content using machine learning.
+An intelligent voice assistant that can analyze speech, detect potential fraud, and engage in natural conversations with users.
 
 ## Overview
 
-Voice Analyzer is an interactive web application that allows users to record their voice, then automatically transcribes and classifies the speech content. The system uses Whisper for speech-to-text transcription and a pre-trained machine learning model to classify the transcribed text into different categories.
+The AI Call Assistant is a sophisticated tool that combines speech recognition, natural language processing, and fraud detection capabilities. It processes spoken input, transcribes it to text, analyzes the content for fraudulent patterns, and generates appropriate responses. The assistant can also extract useful information from conversations, such as names, contact details, and the purpose of the call.
 
 ## Features
 
-- **Real-time Voice Recording**: Record audio directly from your browser
-- **Automatic Transcription**: Convert speech to text using OpenAI's Whisper model
-- **Text Classification**: Analyze the transcribed text and classify it into categories
-- **Visual Results**: View classification results with probability scores as progress bars
-- **Downloadable Recordings**: Save your recordings for later use
+- **Real-time Voice Processing**: Record and process audio in real-time
+- **Speech-to-Text**: Convert spoken words to text using advanced transcription models
+- **Fraud Detection**: Analyze conversation content to detect potential scams or fraudulent activity
+- **Intelligent Responses**: Generate contextually appropriate responses based on the conversation
+- **Text-to-Speech**: Convert responses to natural-sounding speech
+- **Information Extraction**: Automatically extract useful data points like names and contact information
+- **Conversation State Management**: Track the state of the conversation to provide coherent interactions
+- **User-friendly Interface**: Clean, intuitive web interface for interacting with the assistant
 
-## System Architecture
+## Technical Architecture
 
-The application consists of:
+The AI Call Assistant consists of several key components:
 
-1. **Frontend**: A web interface (webapp.html) for recording audio and displaying results
-2. **Backend API**: A Flask server (api.py) that handles audio processing
-3. **Analysis Engine**: Python scripts for transcription and classification (analyze_audio.py)
-4. **ML Model**: A pre-trained classifier for text categorization (voice_text_classifier.joblib)
+1. **Frontend**: HTML interface for recording audio and displaying results
+2. **API Server**: Flask-based backend that handles audio processing and response generation
+3. **Speech Processing**: Whisper-based transcription engine for speech-to-text conversion
+4. **Classification Model**: ML model trained to detect fraudulent patterns in conversations
+5. **Response Generator**: Component that creates appropriate conversational responses
+6. **Text-to-Speech Engine**: Google TTS for converting text responses to audio
 
-## Setup and Installation
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.8+ 
-- Flask and Flask-CORS
-- OpenAI Whisper
-- scikit-learn
-- joblib
-- Required audio processing libraries
+- Python 3.8 or higher
+- Microphone for audio input
+- Speakers for audio output
 
-### Installation Steps
+### Installation
 
-1. Clone the repository:
-   ```bash
-   git clone [repository-url]
-   cd AI_Hackathon
-   ```
+1. Clone this repository:
+```
+git clone https://github.com/yourusername/AI_Hackathon_IITM_bot.git
+cd AI_Hackathon_IITM_bot
+```
 
-2. Install required Python packages:
-   ```bash
-   pip install flask flask-cors openai-whisper scikit-learn joblib torch numpy
-   ```
+2. Install the required dependencies:
+```
+pip install -r requirements.txt
+```
 
-3. Ensure the trained classifier model is available at the root directory:
-   - The application expects a file named `voice_text_classifier.joblib`
+3. Download the required models:
+```
+python -c "import whisper; whisper.load_model('tiny')"
+```
 
-## Running the Application
+### Running the Application
 
 1. Start the API server:
-   ```bash
-   python api.py
-   ```
-   This will start the Flask server on http://localhost:5000
+```
+cd Code
+python api.py
+```
 
-2. Open the webapp.html file in a web browser:
-   - You can use any modern web browser (Chrome, Firefox, Edge, etc.)
-   - For security reasons, some browsers may require serving the HTML through a web server rather than opening it directly as a file
+2. Open the web interface:
+   - Open `Code/webapp.html` in your web browser
+   - Or serve it using a simple HTTP server: `python -m http.server 8000`
 
-## How to Use
-
-1. **Recording Audio**:
-   - Click the "Start Recording" button to begin recording
+3. Use the assistant:
+   - Click the "Call" button to start recording
    - Speak into your microphone
-   - Click "Stop Recording" when finished
+   - Click the button again to stop recording
+   - View the analysis and hear the assistant's response
 
-2. **Viewing Results**:
-   - After recording stops, the audio is automatically sent for analysis
-   - A loading spinner indicates processing is in progress
-   - Results will appear showing:
-     - The transcribed text
-     - The classification result
-     - Probability scores for each category
+## Usage Example
 
-3. **Saving Recordings**:
-   - Each recording has a "Save" button
-   - Click to download the audio file (.wav format) to your device
+1. **Start a Call**: Click the "Call" button and speak a query
+2. **View Analysis**: The system will display:
+   - Transcription of your speech
+   - Classification of the content
+   - Probability scores for different categories
+   - Any extracted information
+3. **Hear Response**: The AI assistant will respond both textually and with synthesized speech
+4. **Continue Conversation**: Click "Call" again to continue the conversation
 
-## Technical Details
+## Development
 
-### API Endpoints
+### Project Structure
 
-The API server provides the following endpoint:
+```
+AI_Hackathon_IITM_bot/
+│
+├── Code/
+│   ├── api.py                    # API server with endpoints for audio processing
+│   ├── analyze_audio.py          # Audio analysis and classification functions
+│   ├── generative_response_bot.py # Response generation logic
+│   └── webapp.html               # Web interface for the assistant
+│
+├── Models/
+│   └── voice_text_classifier.joblib # Pre-trained classification model
+│
+└── logs/                         # Directory for conversation logs
+```
 
-- **POST /analyze**: Analyzes audio content
-  - Accepts multipart/form-data with an 'audio' file
-  - Returns JSON containing:
-    - `text`: The transcribed speech
-    - `prediction`: The classification result
-    - `probabilities`: Scores for each possible class
+### Customization
 
-### File Descriptions
+- **Fraud Threshold**: Adjust `fraud_threshold` in the `ResponseGenerator` initialization
+- **TTS Voice**: Modify the `gtts` parameters in `text_to_speech` function to change language or speed
+- **Response Templates**: Edit the templates in `_get_default_templates` method of `ResponseGenerator`
 
-- **webapp.html**: Frontend web interface for recording and displaying results
-- **api.py**: Flask server handling API requests and audio processing
-- **analyze_audio.py**: Core analysis functions for transcription and classification
-- **main.py**: Contains utility functions for audio conversion and transcription
-- **voice_text_classifier.joblib**: Pre-trained machine learning model
-
-## Troubleshooting
-
-- **Microphone Access**: Ensure your browser has permission to access your microphone
-- **API Connection**: If results aren't loading, verify the API server is running at http://localhost:5000
-- **Console Errors**: Check your browser's developer console (F12) for error messages
-- **File Format**: If uploading files, ensure they are in a supported audio format
-
-## Further Development
-
-Possible enhancements for the project:
-
-- Add user authentication to store and retrieve recordings
-- Implement batch processing for multiple audio files
-- Expand the classification model with more categories
-- Add support for different languages
-- Create a progressive web app (PWA) for offline use
-
-## License
-
-[Specify license information here]
-
-## Acknowledgments
-
-- OpenAI for the Whisper speech recognition model
-- Flask for the web framework
-- scikit-learn for the classification tools
