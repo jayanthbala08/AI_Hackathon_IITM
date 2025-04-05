@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
 
-def load_data(csv_path, text_column='text', label_column='label', test_size=0.2, random_state=42):
+def load_data(csv_path, text_column='transcript', label_column='label', test_size=0.2, random_state=42):
     """
     Load and split the dataset into training and testing sets
     
