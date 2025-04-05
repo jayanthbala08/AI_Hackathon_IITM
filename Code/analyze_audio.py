@@ -1,6 +1,5 @@
 import os
-os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
-
+import sys
 import joblib
 from main import transcribe_with_whisper, convert_to_wav  # Import functions from main.py
 
@@ -49,8 +48,16 @@ def process_audio_file(audio_path, model_path='voice_text_classifier.joblib', wh
     return result
 
 def main():
-    # Input audio file
-    audio_path = "AI_Hackathon_IITM/sample_data/audio_sample_2.wav"
+    # Check if an audio file is provided as argument
+    if len(sys.argv) > 1:
+        audio_path = sys.argv[1]
+        # If the path is relative, make it absolute
+        if not os.path.isabs(audio_path):
+            audio_path = os.path.join(os.getcwd(), audio_path)
+    else:
+        # Default audio file if none provided
+        audio_path = "D:/Jayanth/AI_Hackathon/audio_sample_2.wav"
+        print("No audio file specified. Using default:", audio_path)
     
     # Process the audio file
     result = process_audio_file(audio_path)

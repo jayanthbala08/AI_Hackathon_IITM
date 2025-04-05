@@ -6,7 +6,8 @@ import argparse
 from faster_whisper import WhisperModel
 import whisper
 from pydub import AudioSegment
-import csv  # Add this import
+import csv
+from shutil import which  
 
 def record_audio(filename, duration=5, sample_rate=16000, channels=1):
     chunk = 1024
@@ -40,14 +41,26 @@ def record_audio(filename, duration=5, sample_rate=16000, channels=1):
     
     return filename
 
+def is_ffmpeg_installed():
+    """Check if ffmpeg is installed and accessible."""
+    return which("ffmpeg") is not None
+
 def convert_to_wav(input_path, output_path="converted_audio.wav"):
     """Convert audio file to WAV format."""
+    if not os.path.exists(input_path):
+        print(f"Error: File '{input_path}' does not exist.")
+        return None
+    if not is_ffmpeg_installed():
+        print("Error: ffmpeg is not installed or not in PATH. Please install ffmpeg to proceed.")
+        return None
     try:
+        print(f"Converting '{input_path}' to WAV format...")
         audio = AudioSegment.from_file(input_path)
         audio.export(output_path, format="wav")
+        print(f"Conversion successful: '{output_path}'")
         return output_path
     except Exception as e:
-        print(f"Error converting file to WAV: {e}")
+        print(f"Error converting file '{input_path}' to WAV: {e}")
         return None
 
 def transcribe_with_whisper(audio_path, model_size="tiny"):
@@ -83,6 +96,11 @@ def transcribe_directory_to_csv(directory, output_csv, model_size="tiny"):
         for audio_file in audio_files:
             audio_path = os.path.join(directory, audio_file)
             print(f"Processing file: {audio_file}")
+            print(f"Full path: {audio_path}")
+
+            if not os.path.exists(audio_path):
+                print(f"Error: File '{audio_path}' does not exist. Skipping.")
+                continue
 
             # Convert to WAV if necessary
             if not audio_file.lower().endswith(".wav"):
@@ -115,39 +133,44 @@ def main():
     
     args = parser.parse_args()
     
-    if args.mode == 'record':
-        audio_path = "recorded_audio.wav"
-        try:
-            record_audio(audio_path, duration=args.duration)
-        except Exception as e:
-            print(f"Error recording audio: {e}")
-            return
-        print(f"Transcribing with Whisper ({args.whisper_model} model)...")
-        transcription = transcribe_with_whisper(audio_path, model_size=args.whisper_model)
-        print("\nTranscription:")
-        print(transcription)
-    elif args.mode == 'file':
-        if not args.audio_file or not os.path.exists(args.audio_file):
-            print("Error: Valid audio file path must be provided in 'file' mode.")
-            return
-        if not args.audio_file.lower().endswith(".wav"):
-            print("Converting audio file to WAV format...")
-            audio_path = convert_to_wav(args.audio_file)
-            if not audio_path:
+    try:
+        if args.mode == 'record':
+            audio_path = "recorded_audio.wav"
+            try:
+                record_audio(audio_path, duration=args.duration)
+            except Exception as e:
+                print(f"Error recording audio: {e}")
                 return
+            print(f"Transcribing with Whisper ({args.whisper_model} model)...")
+            transcription = transcribe_with_whisper(audio_path, model_size=args.whisper_model)
+            print("\nTranscription:")
+            print(transcription)
+        elif args.mode == 'file':
+            if not args.audio_file or not os.path.exists(args.audio_file):
+                print("Error: Valid audio file path must be provided in 'file' mode.")
+                return
+            if not args.audio_file.lower().endswith(".wav"):
+                print("Converting audio file to WAV format...")
+                audio_path = convert_to_wav(args.audio_file)
+                if not audio_path:
+                    return
+            else:
+                audio_path = args.audio_file
+            print(f"Transcribing with Whisper ({args.whisper_model} model)...")
+            transcription = transcribe_with_whisper(audio_path, model_size=args.whisper_model)
+            print("\nTranscription:")
+            print(transcription)
+        elif args.mode == 'directory':
+            if not args.directory:
+                print("Error: Directory path must be provided in 'directory' mode.")
+                return
+            transcribe_directory_to_csv(args.directory, args.output_csv, model_size=args.whisper_model)
         else:
-            audio_path = args.audio_file
-        print(f"Transcribing with Whisper ({args.whisper_model} model)...")
-        transcription = transcribe_with_whisper(audio_path, model_size=args.whisper_model)
-        print("\nTranscription:")
-        print(transcription)
-    elif args.mode == 'directory':
-        if not args.directory:
-            print("Error: Directory path must be provided in 'directory' mode.")
-            return
-        transcribe_directory_to_csv(args.directory, args.output_csv, model_size=args.whisper_model)
-    else:
-        print("Invalid mode. Please choose 'record', 'file', or 'directory'.")
+            print("Invalid mode. Please choose 'record', 'file', or 'directory'.")
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by user.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()
