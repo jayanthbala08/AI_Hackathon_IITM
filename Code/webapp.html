@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Recorder</title>
+  <title>Voice Analyzer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,9 +11,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
       background-color: #f5f5f5;
+      padding: 20px;
     }
     
     .container {
@@ -22,7 +23,7 @@
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
+      max-width: 600px;
       width: 90%;
     }
     
@@ -73,15 +74,39 @@
     .audio-item {
       background-color: #f9f9f9;
       border-radius: 4px;
-      padding: 0.8rem;
-      margin-bottom: 0.8rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
     }
     
     .audio-item audio {
-      max-width: 70%;
+      max-width: 100%;
+      margin: 0.5rem 0;
+    }
+    
+    .audio-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+    
+    .audio-controls button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .audio-controls button:hover {
+      background-color: #2980b9;
     }
     
     .status {
@@ -90,22 +115,130 @@
       color: #666;
     }
     
+    .result-container {
+      margin-top: 1.5rem;
+      background-color: #f0f8ff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: left;
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .result-container h3 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+    }
+    
+    .classification {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #2c3e50;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    
+    .transcription {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #3498db;
+    }
+    
+    .probabilities {
+      margin-top: 1rem;
+    }
+    
+    .probability-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    
+    .probability-label {
+      width: 30%;
+      font-weight: bold;
+    }
+    
+    .progress-container {
+      flex: 1;
+      margin: 0 10px;
+    }
+    
+    .progress-bar {
+      height: 12px;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: #3498db;
+      transition: width 0.4s ease-in-out;
+    }
+    
+    .probability-value {
+      min-width: 60px;
+      text-align: right;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(189, 189, 189, 0.25);
+      border-left-color: #3498db;
+      border-radius: 50%;
+      animation: rotate 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+    
+    @keyframes rotate {
+      to { transform: rotate(360deg); }
+    }
+    
     @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
       }
-      70% {
-        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+      
+      .probability-item {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 1.2rem;
       }
-      100% {
-        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+      
+      .probability-label {
+        width: 100%;
+        margin-bottom: 0.3rem;
+      }
+      
+      .progress-container {
+        width: 100%;
+        margin: 0.3rem 0;
+      }
+      
+      .probability-value {
+        width: 100%;
+        text-align: left;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Voice Recorder</h1>
+    <h1>Voice Analyzer</h1>
     
     <button class="record-btn" id="recordButton">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -119,6 +252,15 @@
     <div class="timer" id="timer">00:00</div>
     <div class="status" id="status">Ready to record</div>
     
+    <div class="loading-spinner" id="loadingSpinner"></div>
+    
+    <div class="result-container" id="resultContainer">
+      <h3>Analysis Results</h3>
+      <div class="transcription" id="transcription"></div>
+      <div class="classification" id="classification"></div>
+      <div class="probabilities" id="probabilities"></div>
+    </div>
+    
     <div class="audio-list" id="audioList"></div>
   </div>
 
@@ -128,6 +270,11 @@
       const timer = document.getElementById('timer');
       const status = document.getElementById('status');
       const audioList = document.getElementById('audioList');
+      const resultContainer = document.getElementById('resultContainer');
+      const transcriptionElement = document.getElementById('transcription');
+      const classificationElement = document.getElementById('classification');
+      const probabilitiesElement = document.getElementById('probabilities');
+      const loadingSpinner = document.getElementById('loadingSpinner');
       
       let mediaRecorder;
       let audioChunks = [];
@@ -173,14 +320,17 @@
               audioElement.innerHTML = `
                 <span>Recording ${recordingCount}</span>
                 <audio controls src="${audioUrl}"></audio>
-                <button class="download-btn" data-url="${audioUrl}" data-num="${recordingCount}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" 
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                  </svg>
-                </button>`;
+                <div class="audio-controls">
+                  <button class="download-btn" data-url="${audioUrl}" data-num="${recordingCount}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" x2="12" y1="15" y2="3"></line>
+                    </svg>
+                    Save
+                  </button>
+                </div>`;
               
               audioList.prepend(audioElement);
               
@@ -204,11 +354,13 @@
                 </svg>
                 Start Recording`;
               
-              status.textContent = 'Ready to record';
               timer.textContent = '00:00';
               
               // Stop all tracks in the stream
               audioStream.getTracks().forEach(track => track.stop());
+              
+              // Analyze audio immediately
+              analyzeAudio(audioBlob);
             });
             
             // Start recording
@@ -226,6 +378,10 @@
               Stop Recording`;
             
             status.textContent = 'Recording...';
+            
+            // Hide any previous results
+            resultContainer.style.display = 'none';
+            loadingSpinner.style.display = 'none';
           })
           .catch(error => {
             console.error('Error accessing microphone:', error);
@@ -238,6 +394,75 @@
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
           mediaRecorder.stop();
           clearInterval(timerInterval);
+        }
+      }
+      
+      // Function to analyze audio
+      async function analyzeAudio(audioBlob) {
+        status.textContent = 'Analyzing audio...';
+        loadingSpinner.style.display = 'block';
+        resultContainer.style.display = 'none';
+        
+        try {
+          // Create FormData and append the audio blob
+          const formData = new FormData();
+          formData.append('audio', audioBlob, `recording-${recordingCount}.wav`);
+          
+          // Send to server for analysis
+          const response = await fetch('http://localhost:5000/analyze', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Server returned ${response.status}: ${await response.text()}`);
+          }
+          
+          const result = await response.json();
+          
+          // Hide spinner
+          loadingSpinner.style.display = 'none';
+          
+          // Display results
+          resultContainer.style.display = 'block';
+          transcriptionElement.innerHTML = `<p><strong>Transcription:</strong></p><p>${result.text}</p>`;
+          classificationElement.textContent = `Classification: ${result.prediction}`;
+          
+          // Display probabilities
+          probabilitiesElement.innerHTML = '<h4>Probability Scores:</h4>';
+          
+          // Sort probabilities by value (descending)
+          const sortedProbs = Object.entries(result.probabilities)
+            .sort((a, b) => b[1] - a[1]);
+          
+          sortedProbs.forEach(([label, prob]) => {
+            const percentage = (prob * 100).toFixed(1);
+            const item = document.createElement('div');
+            item.className = 'probability-item';
+            item.innerHTML = `
+              <div class="probability-label">${label}</div>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${percentage}%"></div>
+                </div>
+              </div>
+              <div class="probability-value">${percentage}%</div>
+            `;
+            probabilitiesElement.appendChild(item);
+          });
+          
+          status.textContent = 'Analysis complete';
+        } catch (error) {
+          console.error('Error analyzing audio:', error);
+          loadingSpinner.style.display = 'none';
+          status.textContent = 'Error: Failed to analyze audio. ' + error.message;
+          
+          // Show error in result container
+          resultContainer.style.display = 'block';
+          transcriptionElement.innerHTML = `<p>Sorry, there was an error analyzing your audio:</p><p>${error.message}</p>
+            <p>Please make sure the API server is running at http://localhost:5000</p>`;
+          classificationElement.textContent = '';
+          probabilitiesElement.innerHTML = '';
         }
       }
       
