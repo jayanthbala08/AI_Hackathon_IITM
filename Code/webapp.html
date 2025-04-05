@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Analyzer</title>
+  <title>Voice Analyzer with AI Response</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -23,7 +23,7 @@
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
+      max-width: 800px;
       width: 90%;
     }
     
@@ -64,6 +64,73 @@
       font-size: 2rem;
       margin: 1.5rem 0;
       font-family: monospace;
+    }
+    
+    .status {
+      margin-top: 1rem;
+      font-style: italic;
+      color: #666;
+    }
+    
+    /* Chat container styles */
+    .chat-container {
+      margin-top: 2rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      text-align: left;
+    }
+    
+    .message {
+      padding: 0.8rem 1.2rem;
+      border-radius: 1rem;
+      max-width: 70%;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    
+    .user-message {
+      align-self: flex-end;
+      background-color: #3498db;
+      color: white;
+      border-bottom-right-radius: 0.2rem;
+    }
+    
+    .bot-message {
+      align-self: flex-start;
+      background-color: #e9e9e9;
+      color: #333;
+      border-bottom-left-radius: 0.2rem;
+    }
+    
+    .fraud-message {
+      border-left: 4px solid #e74c3c;
+      background-color: #ffebee;
+    }
+    
+    /* Extracted info styles */
+    .extracted-info {
+      margin-top: 1rem;
+      background-color: #f0f8ff;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: left;
+    }
+    
+    .extracted-info ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    .extracted-info li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e0e0e0;
     }
     
     .audio-list {
@@ -107,12 +174,6 @@
     
     .audio-controls button:hover {
       background-color: #2980b9;
-    }
-    
-    .status {
-      margin-top: 1rem;
-      font-style: italic;
-      color: #666;
     }
     
     .result-container {
@@ -181,6 +242,10 @@
       transition: width 0.4s ease-in-out;
     }
     
+    .fraud-indicator .progress-fill {
+      background-color: #e74c3c;
+    }
+    
     .probability-value {
       min-width: 60px;
       text-align: right;
@@ -233,12 +298,115 @@
         width: 100%;
         text-align: left;
       }
+      
+      .message {
+        max-width: 85%;
+      }
+    }
+    
+    /* TTS toggle switch styles */
+    .tts-toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem 0;
+      gap: 10px;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #3498db;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .bot-message-container {
+      align-self: flex-start;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 70%;
+    }
+    
+    .message-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .play-tts-btn {
+      background: none;
+      border: none;
+      padding: 3px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .play-tts-btn:hover {
+      opacity: 1;
+      background-color: #f0f0f0;
+    }
+    
+    .play-tts-btn svg {
+      width: 16px;
+      height: 16px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Voice Analyzer</h1>
+    <h1>AI Call Assistant</h1>
+    
+    <div class="tts-toggle-container">
+      <span>Text-to-Speech</span>
+      <label class="switch">
+        <input type="checkbox" id="ttsToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
     
     <button class="record-btn" id="recordButton">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -246,13 +414,25 @@
         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
         <line x1="12" x2="12" y1="19" y2="22"></line>
       </svg>
-      Start Recording
+      Call
     </button>
     
     <div class="timer" id="timer">00:00</div>
     <div class="status" id="status">Ready to record</div>
     
     <div class="loading-spinner" id="loadingSpinner"></div>
+    
+    <!-- Chat container for conversation -->
+    <div class="chat-container" id="chatContainer"></div>
+    
+    <!-- Hidden audio element for TTS playback -->
+    <audio id="ttsAudio" style="display: none;"></audio>
+    
+    <!-- Extracted information container -->
+    <div class="extracted-info" id="extractedInfo" style="display: none;">
+      <h3>Extracted Information</h3>
+      <ul id="extractedInfoList"></ul>
+    </div>
     
     <div class="result-container" id="resultContainer">
       <h3>Analysis Results</h3>
@@ -275,6 +455,11 @@
       const classificationElement = document.getElementById('classification');
       const probabilitiesElement = document.getElementById('probabilities');
       const loadingSpinner = document.getElementById('loadingSpinner');
+      const chatContainer = document.getElementById('chatContainer');
+      const extractedInfo = document.getElementById('extractedInfo');
+      const extractedInfoList = document.getElementById('extractedInfoList');
+      const ttsToggle = document.getElementById('ttsToggle');
+      const ttsAudio = document.getElementById('ttsAudio');
       
       let mediaRecorder;
       let audioChunks = [];
@@ -282,6 +467,7 @@
       let timerInterval;
       let audioStream;
       let recordingCount = 0;
+      let currentPlayingButton = null;
       
       // Format time as mm:ss
       function formatTime(timeInSeconds) {
@@ -294,6 +480,114 @@
       function updateTimer() {
         const currentTime = (Date.now() - startTime) / 1000;
         timer.textContent = formatTime(currentTime);
+      }
+      
+      // Play TTS audio for message
+      function playTTS(url, button) {
+        // Stop any currently playing audio
+        ttsAudio.pause();
+        ttsAudio.currentTime = 0;
+        
+        // Reset previous button if exists
+        if (currentPlayingButton) {
+          currentPlayingButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+          `;
+        }
+        
+        // Set the audio source and play
+        ttsAudio.src = `http://localhost:5000${url}`;
+        
+        ttsAudio.onplay = () => {
+          // Update button to show playing state
+          button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          `;
+          currentPlayingButton = button;
+        };
+        
+        ttsAudio.onended = () => {
+          // Reset button when audio ends
+          button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+          `;
+          currentPlayingButton = null;
+        };
+        
+        ttsAudio.play().catch(error => {
+          console.error('Error playing TTS audio:', error);
+          alert('Could not play audio. Please try again.');
+        });
+      }
+      
+      // Add message to chat
+      function addMessage(text, isUser, isFraud = false, ttsUrl = null) {
+        if (isUser) {
+          // Simple user message
+          const messageElement = document.createElement('div');
+          messageElement.className = 'message user-message';
+          messageElement.textContent = text;
+          chatContainer.appendChild(messageElement);
+        } else {
+          // Bot message with TTS controls
+          const messageContainer = document.createElement('div');
+          messageContainer.className = 'bot-message-container';
+          
+          const messageElement = document.createElement('div');
+          messageElement.className = 'message bot-message';
+          if (isFraud) {
+            messageElement.classList.add('fraud-message');
+          }
+          messageElement.textContent = text;
+          
+          // Add TTS button if URL is provided
+          if (ttsUrl) {
+            const controlsElement = document.createElement('div');
+            controlsElement.className = 'message-controls';
+            
+            const ttsButton = document.createElement('button');
+            ttsButton.className = 'play-tts-btn';
+            ttsButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+            `;
+            ttsButton.addEventListener('click', () => playTTS(ttsUrl, ttsButton));
+            
+            controlsElement.appendChild(ttsButton);
+            messageContainer.appendChild(controlsElement);
+          }
+          
+          messageContainer.appendChild(messageElement);
+          chatContainer.appendChild(messageContainer);
+          
+          // Auto-play TTS if enabled
+          if (ttsUrl && ttsToggle.checked) {
+            setTimeout(() => {
+              const button = messageContainer.querySelector('.play-tts-btn');
+              if (button) playTTS(ttsUrl, button);
+            }, 500);
+          }
+        }
+        
+        // Scroll to bottom
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // Make chat container visible if it's the first message
+        chatContainer.style.display = 'flex';
       }
       
       // Start recording function
@@ -423,6 +717,16 @@
           // Hide spinner
           loadingSpinner.style.display = 'none';
           
+          // Add user message to chat
+          if (result.text) {
+            addMessage(result.text, true);
+          }
+          
+          // Add bot response to chat with TTS
+          if (result.bot_response) {
+            addMessage(result.bot_response, false, result.is_fraud, result.tts_url);
+          }
+          
           // Display results
           resultContainer.style.display = 'block';
           transcriptionElement.innerHTML = `<p><strong>Transcription:</strong></p><p>${result.text}</p>`;
@@ -439,10 +743,15 @@
             const percentage = (prob * 100).toFixed(1);
             const item = document.createElement('div');
             item.className = 'probability-item';
+            
+            // Add fraud-indicator class if it's a fraud-related label
+            const isFraudLabel = label.toLowerCase().includes('fraud') || 
+                               label.toLowerCase().includes('scam');
+            
             item.innerHTML = `
               <div class="probability-label">${label}</div>
               <div class="progress-container">
-                <div class="progress-bar">
+                <div class="progress-bar ${isFraudLabel ? 'fraud-indicator' : ''}">
                   <div class="progress-fill" style="width: ${percentage}%"></div>
                 </div>
               </div>
@@ -450,6 +759,20 @@
             `;
             probabilitiesElement.appendChild(item);
           });
+          
+          // Show extracted information if available
+          if (result.extracted_information && Object.keys(result.extracted_information).length > 0) {
+            extractedInfo.style.display = 'block';
+            extractedInfoList.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(result.extracted_information)) {
+              const listItem = document.createElement('li');
+              listItem.innerHTML = `<strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${value}`;
+              extractedInfoList.appendChild(listItem);
+            }
+          } else {
+            extractedInfo.style.display = 'none';
+          }
           
           status.textContent = 'Analysis complete';
         } catch (error) {
@@ -463,6 +786,9 @@
             <p>Please make sure the API server is running at http://localhost:5000</p>`;
           classificationElement.textContent = '';
           probabilitiesElement.innerHTML = '';
+          
+          // Add error message to chat
+          addMessage('Sorry, I encountered an error processing your message. Please try again.', false);
         }
       }
       
