@@ -1,6 +1,6 @@
 # AI Call Assistant
 
-An intelligent voice assistant that can analyze speech, detect potential fraud, and engage in natural conversations with users.
+An intelligent voice assistant that can analyze speech, detect potential fraud, and engage in natural conversations while also booking appointments, setting reminders with users.
 
 ## Overview
 
@@ -25,8 +25,7 @@ The AI Call Assistant consists of several key components:
 2. **API Server**: Flask-based backend that handles audio processing and response generation
 3. **Speech Processing**: Whisper-based transcription engine for speech-to-text conversion
 4. **Classification Model**: ML model trained to detect fraudulent patterns in conversations
-5. **Response Generator**: Component that creates appropriate conversational responses
-6. **Text-to-Speech Engine**: Google TTS for converting text responses to audio
+5. **Response Generator**: Component that creates appropriate conversational responses with a TTS engine deployed as well. 
 
 ## Getting Started
 
@@ -40,13 +39,13 @@ The AI Call Assistant consists of several key components:
 
 1. Clone this repository:
 ```
-git clone https://github.com/yourusername/AI_Hackathon_IITM_bot.git
-cd AI_Hackathon_IITM_bot
+git clone https://github.com/yourusername/AI_Hackathon_IITM.git
+cd AI_Hackathon_IITM
 ```
 
 2. Install the required dependencies:
 ```
-pip install -r requirements.txt
+cd Code; pip install -r requirements.txt
 ```
 
 3. Download the required models:
@@ -58,13 +57,11 @@ python -c "import whisper; whisper.load_model('tiny')"
 
 1. Start the API server:
 ```
-cd Code
 python api.py
 ```
 
 2. Open the web interface:
-   - Open `Code/webapp.html` in your web browser
-   - Or serve it using a simple HTTP server: `python -m http.server 8000`
+   - Open `webapp.html` in your web browser
 
 3. Use the assistant:
    - Click the "Call" button to start recording
@@ -88,18 +85,16 @@ python api.py
 ### Project Structure
 
 ```
-AI_Hackathon_IITM_bot/
+AI_Hackathon_IITM-main_2/
 │
-├── Code/
-│   ├── api.py                    # API server with endpoints for audio processing
-│   ├── analyze_audio.py          # Audio analysis and classification functions
-│   ├── generative_response_bot.py # Response generation logic
-│   └── webapp.html               # Web interface for the assistant
+├── api.py                    # API server with endpoints for audio processing
+├── analyze_audio.py          # Audio analysis and classification functions
+├── generative_response_bot.py # Response generation logic
+├── index.html                # Web interface for the assistant
 │
 ├── Models/
 │   └── voice_text_classifier.joblib # Pre-trained classification model
-│
-└── logs/                         # Directory for conversation logs
+
 ```
 
 ### Customization
