@@ -8,3 +8,18 @@ flask
 flask-cors
 numpy
 joblib
+# Audio processing
+soundfile
+librosa
+# Model dependencies
+torch
+transformers
+# System utilities
+python-dotenv
+requests
+# Web app related
+gunicorn
+werkzeug
+# Additional utilities
+scikit-learn
+pandas
